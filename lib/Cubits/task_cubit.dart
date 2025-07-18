@@ -16,7 +16,9 @@ class TaskCubit extends Cubit<TaskState> {
       final tasks = await _databaseHelper.getAllTasks();
       emit(state.copyWith(tasks: tasks, status: TaskStatus.success));
     } catch (e) {
-      emit(state.copyWith(status: TaskStatus.error, errorMessage: e.toString()));
+      emit(
+        state.copyWith(status: TaskStatus.error, errorMessage: e.toString()),
+      );
     }
   }
 
@@ -25,24 +27,36 @@ class TaskCubit extends Cubit<TaskState> {
     try {
       final id = await _databaseHelper.insertTask(task);
       final newTask = task.copyWith(id: id);
-      emit(state.copyWith(
-        tasks: List.from(state.tasks)..add(newTask),
-        status: TaskStatus.success,
-      ));
+      emit(
+        state.copyWith(
+          tasks: List.from(state.tasks)..add(newTask),
+          status: TaskStatus.success,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(status: TaskStatus.error, errorMessage: e.toString()));
+      emit(
+        state.copyWith(status: TaskStatus.error, errorMessage: e.toString()),
+      );
     }
   }
 
   Future<void> updateTask(int index, TaskModel updatedTask) async {
     emit(state.copyWith(status: TaskStatus.loading));
     try {
-      await _databaseHelper.updateTask(updatedTask);
-      final updatedTasks = List<TaskModel>.from(state.tasks);
-      updatedTasks[index] = updatedTask;
-      emit(state.copyWith(tasks: updatedTasks, status: TaskStatus.success));
+      final taskId = updatedTask.id;
+      if (taskId != null) {
+        await _databaseHelper.updateTask(updatedTask);
+        final updatedTasks = List<TaskModel>.from(state.tasks);
+        final existingIndex = updatedTasks.indexWhere((t) => t.id == taskId);
+        if (existingIndex != -1) {
+          updatedTasks[existingIndex] = updatedTask;
+        }
+        emit(state.copyWith(tasks: updatedTasks, status: TaskStatus.success));
+      }
     } catch (e) {
-      emit(state.copyWith(status: TaskStatus.error, errorMessage: e.toString()));
+      emit(
+        state.copyWith(status: TaskStatus.error, errorMessage: e.toString()),
+      );
     }
   }
 
@@ -50,24 +64,33 @@ class TaskCubit extends Cubit<TaskState> {
     emit(state.copyWith(status: TaskStatus.loading));
     try {
       final taskToDelete = state.tasks[index];
-      await _databaseHelper.deleteTask(taskToDelete.id!);
-      final updatedTasks = List<TaskModel>.from(state.tasks)..removeAt(index);
-      emit(state.copyWith(tasks: updatedTasks, status: TaskStatus.success));
+      if (taskToDelete.id != null) {
+        await _databaseHelper.deleteTask(taskToDelete.id!);
+        final updatedTasks = List<TaskModel>.from(state.tasks)
+          ..removeWhere((t) => t.id == taskToDelete.id);
+        emit(state.copyWith(tasks: updatedTasks, status: TaskStatus.success));
+      }
     } catch (e) {
-      emit(state.copyWith(status: TaskStatus.error, errorMessage: e.toString()));
+      emit(
+        state.copyWith(status: TaskStatus.error, errorMessage: e.toString()),
+      );
     }
   }
 
   Future<void> toggleComplete(int index, bool isCompleted) async {
     emit(state.copyWith(status: TaskStatus.loading));
     try {
-      final taskToUpdate = state.tasks[index].copyWith(isCompleted: isCompleted);
+      final taskToUpdate = state.tasks[index].copyWith(
+        isCompleted: isCompleted,
+      );
       await _databaseHelper.updateTask(taskToUpdate);
       final updatedTasks = List<TaskModel>.from(state.tasks);
       updatedTasks[index] = taskToUpdate;
       emit(state.copyWith(tasks: updatedTasks, status: TaskStatus.success));
     } catch (e) {
-      emit(state.copyWith(status: TaskStatus.error, errorMessage: e.toString()));
+      emit(
+        state.copyWith(status: TaskStatus.error, errorMessage: e.toString()),
+      );
     }
   }
 }

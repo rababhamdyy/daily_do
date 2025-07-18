@@ -15,6 +15,16 @@ class TaskModel {
     this.isCompleted = false,
   });
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TaskModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
   TaskModel copyWith({
     int? id,
     String? title,

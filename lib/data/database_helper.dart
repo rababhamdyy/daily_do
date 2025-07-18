@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -60,22 +61,23 @@ class DatabaseHelper {
   }
 
   Future<int> updateTask(TaskModel task) async {
-    final db = await instance.database;
-    return await db.update(
-      table,
-      _taskToMap(task),
-      where: '$columnId = ?',
-      whereArgs: [task.id],
-    );
+    try {
+      final db = await instance.database;
+      return await db.update(
+        table,
+        _taskToMap(task),
+        where: '$columnId = ?',
+        whereArgs: [task.id],
+      );
+    } catch (e) {
+      debugPrint('Error updating task: $e');
+      rethrow;
+    }
   }
 
   Future<int> deleteTask(int id) async {
     final db = await instance.database;
-    return await db.delete(
-      table,
-      where: '$columnId = ?',
-      whereArgs: [id],
-    );
+    return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 
   Map<String, dynamic> _taskToMap(TaskModel task) {

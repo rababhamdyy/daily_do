@@ -24,6 +24,9 @@ class HomePage extends StatelessWidget {
               Expanded(
                 child: BlocBuilder<TaskCubit, TaskState>(
                   builder: (context, state) {
+                    if (state.status == TaskStatus.loading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
                     if (state.tasks.isEmpty) {
                       return const Center(child: Text('No tasks available'));
                     }
@@ -46,7 +49,7 @@ class HomePage extends StatelessWidget {
                             final updatedTask = await Navigator.pushNamed(
                               context,
                               '/edit_task',
-                              arguments: state.tasks[index],
+                              arguments: state.tasks[index].copyWith(),
                             );
                             if (updatedTask != null) {
                               context.read<TaskCubit>().updateTask(
@@ -56,7 +59,31 @@ class HomePage extends StatelessWidget {
                             }
                           },
                           onDelete: () {
-                            context.read<TaskCubit>().deleteTask(index);
+                            showDialog(
+                              context: context,
+                              builder:
+                                  (context) => AlertDialog(
+                                    title: const Text('Delete Task'),
+                                    content: const Text(
+                                      'Are you sure you want to delete this task?',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          context.read<TaskCubit>().deleteTask(
+                                            index,
+                                          );
+                                        },
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                            );
                           },
                         );
                       },
