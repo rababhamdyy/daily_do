@@ -1,10 +1,13 @@
 class TaskModel {
+  int? id;
   String title;
   String description;
   String dueDate;
   String dueTime;
   bool isCompleted;
+  
   TaskModel({
+    this.id,
     required this.title,
     required this.description,
     required this.dueDate,
@@ -13,6 +16,7 @@ class TaskModel {
   });
 
   TaskModel copyWith({
+    int? id,
     String? title,
     String? description,
     String? dueDate,
@@ -20,6 +24,7 @@ class TaskModel {
     bool? isCompleted,
   }) {
     return TaskModel(
+      id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
       dueDate: dueDate ?? this.dueDate,

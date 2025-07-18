@@ -5,7 +5,8 @@ import 'pages/home_page.dart';
 import 'pages/add_task_page.dart';
 import 'models/task_model.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(BlocProvider(create: (_) => TaskCubit(), child: const MyApp()));
 }
 
